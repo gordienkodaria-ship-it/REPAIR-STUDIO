@@ -1,0 +1,38 @@
+{% extends 'workshop/base.html' %}
+
+{% block title %}Редактирование услуги — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="admin-edit-page">
+
+    <div class="admin-edit-header">
+        <span class="admin-label">REPAIR STUDIO</span>
+        <h1>Редактирование услуги</h1>
+        <p>Изменение информации об услуге мастерской</p>
+    </div>
+
+    <div class="admin-edit-card">
+
+        <form method="POST" class="admin-form">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <div class="admin-edit-actions">
+                <button type="submit" class="admin-submit">
+                    Сохранить изменения
+                </button>
+
+                <a href="{% url 'admin_dashboard' %}"
+                   class="admin-edit-back">
+                    Вернуться назад
+                </a>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

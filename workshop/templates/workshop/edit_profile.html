@@ -1,0 +1,83 @@
+{% extends 'workshop/base.html' %}
+
+{% block title %}Мой профиль — Repair Studio{% endblock %}
+
+{% block content %}
+
+<section class="profile-section">
+    <div class="container">
+
+        <div class="profile-header">
+            <a href="{% url 'dashboard' %}" class="profile-back">
+                ← Вернуться в личный кабинет
+            </a>
+
+            <span class="profile-label">REPAIR STUDIO / ПРОФИЛЬ</span>
+            <h1>Мой профиль</h1>
+            <p>Управляйте личными данными и информацией своего аккаунта.</p>
+        </div>
+
+        <div class="profile-card">
+
+            <div class="profile-card-heading">
+                <div class="profile-avatar">
+                    {{ user.first_name|default:user.username|slice:":1"|upper }}
+                </div>
+
+                <div>
+                    <h2>{{ user.first_name|default:user.username }} {{ user.last_name }}</h2>
+                    <p>
+                        {% if user.role == 'client' %}
+                            Клиент
+                        {% elif user.role == 'master' %}
+                            Мастер
+                        {% else %}
+                            Администратор
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="profile-divider"></div>
+
+            <form method="post" class="profile-form">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="form-error">
+                        Проверьте правильность заполнения полей.
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ field.label }}: {{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <h3>Личная информация</h3>
+
+                {% for field in form %}
+                    <div class="profile-field">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small>{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="profile-save">
+                    Сохранить изменения
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

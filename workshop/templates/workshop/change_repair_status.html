@@ -1,0 +1,48 @@
+
+{% extends 'workshop/base.html' %}
+
+{% block title %}Изменение статуса — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="status-edit-page">
+
+    <a href="{% url 'repair_detail' repair.id %}" class="repair-detail-back">
+        ← Вернуться к заявке
+    </a>
+
+    <div class="status-edit-header">
+        <span>REPAIR STUDIO / УПРАВЛЕНИЕ РЕМОНТОМ</span>
+        <h1>Изменение статуса</h1>
+        <p>Заявка №{{ repair.id }}</p>
+    </div>
+
+    <section class="status-edit-card">
+
+        <div class="status-edit-info">
+            <span>Устройство</span>
+            <strong>{{ repair.device_type }}</strong>
+        </div>
+
+        <div class="status-edit-info">
+            <span>Текущий статус</span>
+            <strong>{{ repair.get_status_display }}</strong>
+        </div>
+
+        <h2>Новый статус заявки</h2>
+
+        <form method="post" class="status-edit-form">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">
+                Сохранить изменения
+            </button>
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

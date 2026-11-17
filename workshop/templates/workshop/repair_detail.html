@@ -1,0 +1,182 @@
+
+{% extends 'workshop/base.html' %}
+
+{% block title %}Заявка №{{ repair.id }} — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="repair-detail-page">
+
+    <a href="{% url 'dashboard' %}" class="repair-detail-back">
+        ← Вернуться в кабинет
+    </a>
+
+    <div class="repair-detail-header">
+        <span>REPAIR STUDIO / РЕМОНТ</span>
+        <h1>Заявка №{{ repair.id }}</h1>
+        <p>Подробная информация о ремонте устройства</p>
+        <br>
+        <span class="repair-detail-status">
+            {{ repair.get_status_display }}
+        </span>
+    </div>
+
+    <section class="repair-detail-card">
+        <h2>Информация о заявке</h2>
+
+        <div class="repair-info-grid">
+            <div class="repair-info-item">
+                <span>Клиент</span>
+                <strong>{{ repair.customer }}</strong>
+            </div>
+
+            <div class="repair-info-item">
+                <span>Мастер</span>
+                <strong>{{ repair.master|default:"Не назначен" }}</strong>
+            </div>
+
+            <div class="repair-info-item">
+                <span>Устройство</span>
+                <strong>{{ repair.device_type }}</strong>
+            </div>
+
+            <div class="repair-info-item">
+                <span>Услуга</span>
+                <strong>{{ repair.service|default:"Не указана" }}</strong>
+            </div>
+
+            <div class="repair-info-item">
+                <span>Стоимость работ</span>
+                <strong>{{ repair.work_cost }} руб.</strong>
+            </div>
+
+            <div class="repair-info-item">
+                <span>Дата создания</span>
+                <strong>{{ repair.created_at|date:"d.m.Y H:i" }}</strong>
+            </div>
+        </div>
+
+        <div style="margin-top: 22px;">
+            <span style="color: var(--text-muted); font-size: 12px;">
+                Описание неисправности
+            </span>
+            <p>{{ repair.description }}</p>
+        </div>
+
+        {% if repair.photo %}
+            <h3>Фотография устройства</h3>
+            <img
+                src="{{ repair.photo.url }}"
+                alt="Фото устройства"
+                class="repair-detail-photo"
+            >
+        {% endif %}
+
+        {% if user.role == 'client' and repair.status == 'new' %}
+            <div class="repair-detail-actions">
+                <a href="{% url 'edit_repair_request' repair.id %}">
+                    Редактировать заявку
+                </a>
+
+                <form method="post"
+                      action="{% url 'delete_repair_request' repair.id %}"
+                      onsubmit="return confirm('Удалить заявку?');">
+                    {% csrf_token %}
+                    <button type="submit">Удалить заявку</button>
+                </form>
+            </div>
+        {% endif %}
+
+        {% if user.role == 'master' %}
+            <div class="repair-detail-actions">
+                <a href="{% url 'change_repair_status' repair.id %}">
+                    Изменить статус заявки
+                </a>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="repair-detail-card">
+        <h2>История ремонта</h2>
+
+        {% for history in status_history %}
+            <div class="repair-history-item">
+                <strong>{{ history.get_new_status_display }}</strong>
+                <p>Дата: {{ history.created_at|date:"d.m.Y H:i" }}</p>
+                <p>Кто изменил: {{ history.changed_by|default:"Не указан" }}</p>
+                <p>Комментарий: {{ history.comment|default:"Нет комментария" }}</p>
+            </div>
+        {% empty %}
+            <div class="repair-detail-empty">
+                История изменений пока пуста.
+            </div>
+        {% endfor %}
+    </section>
+
+    <section class="repair-detail-card">
+        <h2>Использованные запчасти</h2>
+
+        <div class="repair-parts-list">
+            {% for usage in part_usages %}
+                <div class="repair-part-item">
+                    <div>
+                        <strong>{{ usage.part.name }}</strong>
+                        <p>
+                            Количество: {{ usage.quantity }} шт.
+                            · Цена за единицу: {{ usage.unit_price }} руб.
+                        </p>
+                    </div>
+
+                    <div class="repair-part-price">
+                        {{ usage.quantity|floatformat:2 }} × {{ usage.unit_price }} руб.
+                    </div>
+                </div>
+            {% empty %}
+                <div class="repair-detail-empty">
+                    Использованные запчасти пока не добавлены.
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if user.role == 'master' %}
+            <h3 style="margin-top: 28px;">Добавить запчасть</h3>
+
+            <form method="post"
+                  action="{% url 'add_part_usage' repair.id %}"
+                  class="repair-detail-form">
+                {% csrf_token %}
+                {{ part_usage_form.as_p }}
+                <button type="submit">Добавить запчасть</button>
+            </form>
+        {% endif %}
+    </section>
+
+    <section class="repair-detail-card">
+        <h2>Комментарии к заявке</h2>
+
+        {% for comment in comments %}
+            <div class="repair-history-item">
+                <strong>{{ comment.author }}</strong>
+                <p>{{ comment.text }}</p>
+                <p>{{ comment.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+        {% empty %}
+            <div class="repair-detail-empty">
+                Комментариев пока нет.
+            </div>
+        {% endfor %}
+
+        <h3 style="margin-top: 28px;">Добавить комментарий</h3>
+
+        <form method="post"
+              action="{% url 'add_repair_comment' repair.id %}"
+              class="repair-detail-form">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <button type="submit">Отправить комментарий</button>
+        </form>
+    </section>
+
+</div>
+
+{% endblock %}

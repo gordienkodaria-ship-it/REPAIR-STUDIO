@@ -1,0 +1,216 @@
+{% extends 'workshop/base.html' %}
+
+{% block title %}Repair Studio — Ремонт техники{% endblock %}
+
+{% block content %}
+
+<section class="hero" id="top">
+    <div class="container hero-content">
+
+        <div class="hero-text">
+            <span class="hero-label">
+                ПРОФЕССИОНАЛЬНЫЙ РЕМОНТ ТЕХНИКИ
+            </span>
+
+            <h1>
+                Вернём вашей технике
+                <span>вторую жизнь</span>
+            </h1>
+
+            <p>
+                Качественный ремонт смартфонов, ноутбуков
+                и другой электроники. Опытные мастера,
+                внимательный подход и гарантия на работы.
+            </p>
+
+            <div class="hero-buttons">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create_repair_request' %}"
+                       class="btn-primary">
+                        Оставить заявку
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}"
+                       class="btn-primary">
+                        Оставить заявку
+                    </a>
+                {% endif %}
+
+                <a href="#services" class="btn-secondary">
+                    Наши услуги
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="services-section" id="services">
+    <div class="container">
+        <div class="section-heading">
+            <span class="section-label">ЧТО МЫ ПРЕДЛАГАЕМ</span>
+            <h2>Наши услуги</h2>
+            <p>Помогаем вашей технике снова работать как новой.</p>
+        </div>
+
+        <div class="services-grid">
+            {% for service in services %}
+                <div class="service-card">
+                    <div class="service-icon">⚙</div>
+
+                    <h3>{{ service.name }}</h3>
+
+                    <p>{{ service.description }}</p>
+
+                    <div class="service-price">
+                        от {{ service.price }} ₽
+                    </div>
+                </div>
+            {% empty %}
+                <p>Сейчас услуги не добавлены.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+<section class="advantages-section" id="about">
+    <div class="container">
+
+        <div class="section-heading">
+            <span class="section-label">НАШИ ПРЕИМУЩЕСТВА</span>
+            <h2>Почему выбирают нас?</h2>
+            <p>Мы заботимся не только о вашей технике, но и о вашем спокойствии.</p>
+        </div>
+
+        <div class="advantages-grid">
+
+            <div class="advantage-card">
+                <div class="advantage-icon">✦</div>
+                <h3>Опытные мастера</h3>
+                <p>Доверьте свою технику специалистам, которые знают своё дело.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">✓</div>
+                <h3>Качество работ</h3>
+                <p>Внимательно подходим к каждой детали и проверяем результат.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">₽</div>
+                <h3>Честные цены</h3>
+                <p>Стоимость ремонта согласовывается заранее, без неприятных сюрпризов.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">♡</div>
+                <h3>Забота о клиентах</h3>
+                <p>Всегда готовы ответить на вопросы и рассказать о ходе ремонта.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+<section class="stats-section">
+    <div class="container stats-grid">
+
+        <div class="stat-item">
+            <span class="stat-number">8</span>
+            <span class="stat-text">Видов услуг</span>
+        </div>
+
+        <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-text">Внимание к деталям</span>
+        </div>
+
+        <div class="stat-item">
+            <span class="stat-number">24/7</span>
+            <span class="stat-text">Приём онлайн-заявок</span>
+        </div>
+
+        <div class="stat-item">
+            <span class="stat-number">1</span>
+            <span class="stat-text">Цель — исправная техника</span>
+        </div>
+
+    </div>
+</section>
+
+
+
+<section class="about-section" id="about-workshop">
+    <div class="container about-content">
+
+        <div class="about-image">
+            <div class="about-image-placeholder">
+                <span>REPAIR STUDIO</span>
+                <p>Профессиональный подход к каждой детали</p>
+            </div>
+        </div>
+
+        <div class="about-text">
+            <span class="section-label">НЕМНОГО О НАС</span>
+
+            <h2>Техника заслуживает второго шанса</h2>
+
+            <p>
+                Наша мастерская создана для тех, кто ценит качество,
+                надёжность и внимательное отношение к своей технике.
+            </p>
+
+            <p>
+                Мы стремимся сделать ремонт понятным и удобным:
+                от оформления заявки до получения исправного устройства.
+            </p>
+
+            <a href="{% url 'register' %}" class="btn-primary">
+                Стать нашим клиентом
+            </a>
+        </div>
+
+    </div>
+</section>
+
+
+
+<section class="contacts-section" id="contacts">
+    <div class="container">
+        <div class="section-heading">
+            <span class="section-label">МЫ ВСЕГДА НА СВЯЗИ</span>
+            <h2>Контакты</h2>
+            <p>Будем рады помочь вам с ремонтом техники!</p>
+        </div>
+
+        <div class="contacts-grid">
+            <div class="contact-card">
+                <h3>Наш адрес</h3>
+                <p>г. Новосибирск, ул. Ленина, 1</p>
+                <p>БЦ «РосЕвроПлаза», офис 804</p>
+            </div>
+
+            <div class="contact-card">
+                <h3>Телефон</h3>
+                <p>+7 (383) 207-45-89</p>
+            </div>
+
+            <div class="contact-card">
+                <h3>Электронная почта</h3>
+                <p>hello@repairstudio.ru</p>
+            </div>
+
+            <div class="contact-card">
+                <h3>Время работы</h3>
+                <p>Пн–Сб: 09:00–20:00</p>
+                <p>Вс: выходной</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

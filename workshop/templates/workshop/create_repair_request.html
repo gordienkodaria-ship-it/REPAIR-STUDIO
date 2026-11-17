@@ -1,0 +1,57 @@
+
+{% extends 'workshop/base.html' %}
+
+{% block title %}Новая заявка — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="create-repair-page">
+
+    <div class="create-repair-header">
+        <span class="create-repair-label">REPAIR STUDIO / ЗАЯВКИ</span>
+        <h1>Новая заявка на ремонт</h1>
+        <p>Расскажите, что случилось с вашим устройством, и мы поможем решить проблему.</p>
+    </div>
+
+    <div class="create-repair-card">
+
+        <div class="create-repair-card-heading">
+            <h2>Информация об устройстве</h2>
+            <p>Заполните все необходимые поля</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="create-repair-form">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="create-repair-field">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <span class="create-repair-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="create-repair-submit">
+                Отправить заявку
+            </button>
+        </form>
+
+    </div>
+
+    <a href="{% url 'dashboard' %}" class="create-repair-back">
+        ← Вернуться в личный кабинет
+    </a>
+
+</div>
+
+{% endblock %}

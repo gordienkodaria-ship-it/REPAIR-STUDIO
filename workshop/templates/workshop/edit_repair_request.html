@@ -1,0 +1,55 @@
+
+{% extends 'workshop/base.html' %}
+
+{% block title %}Редактирование заявки — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="edit-repair-page">
+
+    <div class="edit-repair-header">
+        <span class="edit-repair-label">REPAIR STUDIO / ЗАЯВКИ</span>
+        <h1>Редактирование заявки №{{ repair.id }}</h1>
+        <p>При необходимости измените информацию о вашем устройстве или неисправности.</p>
+    </div>
+
+    <div class="edit-repair-card">
+
+        <div class="edit-repair-card-heading">
+            <h2>Данные заявки</h2>
+            <p>Внесите необходимые изменения</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="edit-repair-form">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="edit-repair-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <span class="edit-repair-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="edit-repair-submit">
+                Сохранить изменения
+            </button>
+        </form>
+
+    </div>
+
+    <a href="{% url 'repair_detail' repair.id %}" class="edit-repair-back">
+        ← Вернуться к заявке
+    </a>
+
+</div>
+
+{% endblock %}

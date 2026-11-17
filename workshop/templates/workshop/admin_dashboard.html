@@ -1,0 +1,525 @@
+
+{% extends 'workshop/base.html' %}
+
+{% block title %}Панель администратора — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="admin-dashboard">
+
+    <!-- ШАПКА -->
+    
+    <div class="admin-header">
+
+         <div class="admin-header-info">
+            <span class="admin-label">REPAIR STUDIO</span>
+            <h1>Панель администратора</h1>
+            <p>Управление ремонтной мастерской</p>
+        </div>
+
+        <div class="admin-header-actions">
+
+            <a href="{% url 'statistics' %}" class="admin-statistics-link">
+                Статистика
+            </a>
+
+            <a href="{% url 'dashboard' %}" class="back-to-dashboard">
+                Вернуться в личный кабинет
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- СТАТИСТИКА -->
+    <section class="admin-section">
+        <div class="admin-section-heading">
+            <h2>Общая статистика</h2>
+            <p>Основные показатели мастерской</p>
+        </div>
+
+        <div class="admin-stats">
+
+            <div class="admin-stat-card">
+                <span>Всего заявок</span>
+                <strong>{{ repairs_count }}</strong>
+            </div>
+
+            <div class="admin-stat-card">
+                <span>Новые заявки</span>
+                <strong>{{ new_repairs_count }}</strong>
+            </div>
+
+            <div class="admin-stat-card">
+                <span>Клиенты</span>
+                <strong>{{ clients_count }}</strong>
+            </div>
+
+            <div class="admin-stat-card">
+                <span>Мастера</span>
+                <strong>{{ masters_count }}</strong>
+            </div>
+
+            <div class="admin-stat-card">
+                <span>Услуги</span>
+                <strong>{{ services_count }}</strong>
+            </div>
+
+            <div class="admin-stat-card">
+                <span>Виды запчастей</span>
+                <strong>{{ parts_count }}</strong>
+            </div>
+
+        </div>
+
+        <div class="admin-income">
+            <span>Выручка от завершённых заказов</span>
+            <strong>{{ income }} ₽</strong>
+        </div>
+    </section>
+
+
+    <!-- ЗАЯВКИ -->
+    <section class="admin-section">
+
+        <div class="admin-section-heading">
+            <h2>Управление заявками</h2>
+            <p>Просмотр заявок и назначение ответственных мастеров</p>
+        </div>
+
+        {% if repairs %}
+
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Клиент</th>
+                            <th>Устройство</th>
+                            <th>Услуга</th>
+                            <th>Статус</th>
+                            <th>Мастер</th>
+                            <th>Стоимость</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for repair in repairs %}
+                            <tr>
+                                <td>#{{ repair.id }}</td>
+
+                                <td>
+                                    {{ repair.customer.username }}
+                                </td>
+
+                                <td>
+                                    {{ repair.device_type }}
+                                </td>
+
+                                <td>
+                                    {% if repair.service %}
+                                        {{ repair.service.name }}
+                                    {% else %}
+                                        Не указана
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="admin-status">
+                                        {{ repair.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if repair.master %}
+                                        {{ repair.master.username }}
+                                    {% else %}
+                                        <span class="admin-unassigned">
+                                            Не назначен
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ repair.work_cost }} ₽
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{% url 'repair_detail' repair.id %}"
+                                        class="admin-action-link"
+                                    >
+                                        Подробнее
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr class="admin-assign-row">
+                                <td colspan="8">
+                                    <form
+                                        method="POST"
+                                        class="admin-assign-form"
+                                    >
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="action"
+                                            value="assign_master"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="repair_id"
+                                            value="{{ repair.id }}"
+                                        >
+
+                                        <label>
+                                            Назначить мастера:
+                                        </label>
+
+                                        <select name="master">
+                                            <option value="">
+                                                Не назначен
+                                            </option>
+
+                                            {% for master in masters %}
+                                                <option
+                                                    value="{{ master.id }}"
+                                                    {% if repair.master_id == master.id %}
+                                                        selected
+                                                    {% endif %}
+                                                >
+                                                    {{ master.username }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <button type="submit">
+                                            Сохранить
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <div class="admin-empty">
+                Заявок пока нет.
+            </div>
+        {% endif %}
+
+    </section>
+
+
+    <!-- СОТРУДНИКИ -->
+    <section class="admin-section">
+
+        <div class="admin-section-heading">
+            <h2>Сотрудники и клиенты</h2>
+            <p>Список зарегистрированных пользователей мастерской</p>
+        </div>
+
+        <div class="admin-columns">
+
+            <div class="admin-card">
+                <h3>Добавить мастера</h3>
+
+                <form method="POST" class="admin-form">
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="create_master"
+                    >
+
+                    {{ master_form.as_p }}
+
+                    <button type="submit" class="admin-submit">
+                        Добавить мастера
+                    </button>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <h3>Список мастеров</h3>
+
+                {% if masters %}
+                    <div class="admin-user-list">
+                        {% for master in masters %}
+                            <div class="admin-user-item">
+                                <div>
+                                    <strong>{{ master.username }}</strong>
+
+                                    {% if master.first_name or master.last_name %}
+                                        <span>
+                                            {{ master.first_name }}
+                                            {{ master.last_name }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <span class="admin-user-role">
+                                    Мастер
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="admin-muted">
+                        Мастеров пока нет.
+                    </p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="admin-card admin-clients-card">
+            <h3>Зарегистрированные клиенты</h3>
+
+            {% if clients %}
+                <div class="admin-user-list">
+                    {% for client in clients %}
+                        <div class="admin-user-item">
+                            <div>
+                                <strong>{{ client.username }}</strong>
+
+                                {% if client.email %}
+                                    <span>{{ client.email }}</span>
+                                {% endif %}
+                            </div>
+
+                            <span class="admin-user-role">
+                                Клиент
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="admin-muted">
+                    Клиентов пока нет.
+                </p>
+            {% endif %}
+        </div>
+
+    </section>
+
+
+    <!-- УСЛУГИ -->
+    <section class="admin-section">
+
+        <div class="admin-section-heading">
+            <h2>Управление услугами</h2>
+            <p>Добавление и редактирование услуг мастерской</p>
+        </div>
+
+        <div class="admin-card admin-create-card">
+            <h3>Добавить новую услугу</h3>
+
+            <form method="POST" class="admin-form">
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="create_service"
+                >
+
+                {{ service_form.as_p }}
+
+                <button type="submit" class="admin-submit">
+                    Добавить услугу
+                </button>
+            </form>
+        </div>
+
+        <div class="admin-items-grid">
+
+            {% for service in services %}
+                <div class="admin-item-card">
+
+                    <div class="admin-item-top">
+                        <h3>{{ service.name }}</h3>
+
+                        {% if service.is_active %}
+                            <span class="admin-active">
+                                Активна
+                            </span>
+                        {% else %}
+                            <span class="admin-inactive">
+                                Неактивна
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <p>{{ service.description }}</p>
+
+                    <strong class="admin-item-price">
+                        {{ service.price }} ₽
+                    </strong>
+
+                    <div class="admin-item-actions">
+                        <a
+                            href="{% url 'edit_service' service.id %}"
+                            class="admin-action-link"
+                        >
+                            Редактировать
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="{% url 'delete_service' service.id %}"
+                            onsubmit="return confirm('Удалить эту услугу?');"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="admin-delete-button"
+                            >
+                                Удалить
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            {% empty %}
+                <div class="admin-empty">
+                    Услуг пока нет.
+                </div>
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- СКЛАД -->
+    <section class="admin-section">
+
+        <div class="admin-section-heading">
+            <h2>Склад запчастей</h2>
+            <p>Управление остатками и стоимостью запчастей</p>
+        </div>
+
+        {% if low_stock_parts %}
+            <div class="admin-stock-warning">
+                <strong>Внимание: заканчиваются запчасти</strong>
+
+                {% for part in low_stock_parts %}
+                    <p>
+                        {{ part.name }} — осталось {{ part.quantity }} шт.
+                    </p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="admin-card admin-create-card">
+            <h3>Добавить запчасть</h3>
+
+            <form method="POST" class="admin-form">
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="action"
+                    value="create_part"
+                >
+
+                {{ part_form.as_p }}
+
+                <button type="submit" class="admin-submit">
+                    Добавить запчасть
+                </button>
+            </form>
+        </div>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Количество</th>
+                        <th>Цена за единицу</th>
+                        <th>Минимальный остаток</th>
+                        <th>Состояние</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for part in parts %}
+                        <tr>
+                            <td>{{ part.name }}</td>
+
+                            <td>{{ part.description|default:"—" }}</td>
+
+                            <td>{{ part.quantity }} шт.</td>
+
+                            <td>{{ part.unit_price }} ₽</td>
+
+                            <td>{{ part.min_quantity }} шт.</td>
+
+                            <td>
+                                {% if part.quantity <= part.min_quantity %}
+                                    <span class="admin-inactive">
+                                        Мало
+                                    </span>
+                                {% else %}
+                                    <span class="admin-active">
+                                        В наличии
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="admin-table-actions">
+                                    <a
+                                        href="{% url 'edit_part' part.id %}"
+                                        class="admin-action-link"
+                                    >
+                                        Изменить
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{% url 'delete_part' part.id %}"
+                                        onsubmit="return confirm('Удалить эту запчасть?');"
+                                    >
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="submit"
+                                            class="admin-delete-button"
+                                        >
+                                            Удалить
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                Запчастей пока нет.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

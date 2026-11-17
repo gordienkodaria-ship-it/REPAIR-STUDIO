@@ -1,0 +1,94 @@
+
+{% extends 'workshop/base.html' %}
+
+{% block title %}Статистика — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<div class="statistics-page">
+
+    <div class="statistics-header">
+        <span>REPAIR STUDIO / АНАЛИТИКА</span>
+        <h1>Статистика</h1>
+        <p>Основные показатели работы мастерской</p>
+    </div>
+
+    <div class="statistics-grid">
+
+        <div class="statistics-card">
+            <span>Всего заявок</span>
+            <strong>{{ total_repairs }}</strong>
+            <p>Все зарегистрированные заявки</p>
+        </div>
+
+        <div class="statistics-card">
+            <span>Активные ремонты</span>
+            <strong>{{ active_count }}</strong>
+            <p>Заявки в работе</p>
+        </div>
+
+        <div class="statistics-card">
+            <span>Завершённые ремонты</span>
+            <strong>{{ completed_count }}</strong>
+            <p>Успешно выполненные заявки</p>
+        </div>
+
+        <div class="statistics-card">
+            <span>Доход мастерской</span>
+            <strong>{{ income|floatformat:0 }} ₽</strong>
+            <p>По завершённым ремонтам</p>
+        </div>
+
+    </div>
+
+    <section class="statistics-section">
+        <h2>Распределение заявок по статусам</h2>
+        <p class="statistics-description">
+            Количество заявок в каждом статусе
+        </p>
+
+        {% for item in status_statistics %}
+            <div class="statistics-bar-item">
+
+                <div class="statistics-bar-heading">
+                    <span>{{ item.label }}</span>
+                    <strong>{{ item.count }}</strong>
+                </div>
+
+                <div class="statistics-bar-background">
+                    <div class="statistics-bar-fill"
+                        data-width="{{ item.percentage }}">
+                    </div>
+                </div>
+
+                <span class="statistics-percentage">
+                    {{ item.percentage }}%
+                </span>
+
+            </div>
+        {% endfor %}
+    </section>
+
+    <section class="statistics-section">
+        <h2>Отменённые заявки</h2>
+        <div class="statistics-cancelled">
+            <strong>{{ cancelled_count }}</strong>
+            <span>Заявок было отменено</span>
+        </div>
+    </section>
+
+    <a href="{% url 'admin_dashboard' %}" class="statistics-back">
+        ← Вернуться в панель администратора
+    </a>
+
+</div>
+
+
+<script>
+document.querySelectorAll('.statistics-bar-fill').forEach(bar => {
+    const width = Number(bar.dataset.width);
+    bar.style.width = `${Math.max(0, Math.min(100, width))}%`;
+});
+</script>
+
+{% endblock %}

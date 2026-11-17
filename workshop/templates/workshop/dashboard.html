@@ -1,0 +1,147 @@
+{% extends 'workshop/base.html' %}
+
+{% block title %}Личный кабинет — REPAIR STUDIO{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+    <div class="container">
+
+        <div class="dashboard-welcome">
+            <div>
+                <span class="dashboard-label">REPAIR STUDIO / ЛИЧНЫЙ КАБИНЕТ</span>
+
+                {% if user.role == 'client' %}
+                    <h1>Здравствуйте, {{ user.first_name|default:user.username }}!</h1>
+                    <p>Здесь вы можете следить за своими заявками и историей ремонта.</p>
+
+                {% elif user.role == 'master' %}
+                    <h1>Здравствуйте, мастер {{ user.first_name|default:user.username }}!</h1>
+                    <p>Здесь находятся заявки, назначенные вам на ремонт.</p>
+
+                {% elif user.role == 'admin' %}
+                    <h1>Панель управления</h1>
+                    <p>Здесь собраны все заявки вашей мастерской.</p>
+                {% endif %}
+            </div>
+
+            <div class="dashboard-actions">
+                <a href="{% url 'edit_profile' %}" class="profile-button">
+                    Мой профиль
+                </a>
+
+                {% if user.role == 'admin' %}
+                    <a href="{% url 'admin_dashboard' %}" class="admin-panel-button">
+                        Панель администратора
+                    </a>
+                {% endif %}
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Выйти</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="dashboard-stat-card">
+                <span class="stat-icon">▤</span>
+                <div>
+                    <p>Всего заявок</p>
+                    <h2>{{ repair_requests|length }}</h2>
+                </div>
+            </div>
+
+            <div class="dashboard-stat-card">
+                <span class="stat-icon">⚙</span>
+                <div>
+                    <p>Мой профиль</p>
+                    <h2>
+                        {% if user.role == 'client' %}
+                            Клиент
+                        {% elif user.role == 'master' %}
+                            Мастер
+                        {% else %}
+                            Администратор
+                        {% endif %}
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-list-heading">
+            <div>
+                {% if user.role == 'client' %}
+                    <h2>Мои заявки</h2>
+                    <p>Все обращения в ремонтную мастерскую</p>
+                {% elif user.role == 'master' %}
+                    <h2>Назначенные заявки</h2>
+                    <p>Заявки, над которыми вы работаете</p>
+                {% else %}
+                    <h2>Все заявки мастерской</h2>
+                    <p>Общий список обращений клиентов</p>
+                {% endif %}
+            </div>
+
+            {% if user.role == 'client' %}
+                <a href="{% url 'create_repair_request' %}" class="create-request-button">
+                    + Создать заявку
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-repairs">
+            {% for repair in repair_requests %}
+                <div class="repair-card">
+
+                    <div class="repair-card-top">
+                        <span class="repair-number">ЗАЯВКА №{{ repair.id }}</span>
+
+                        <span class="repair-status status-{{ repair.status }}">
+                            {{ repair.get_status_display }}
+                        </span>
+                    </div>
+
+                    <h3>{{ repair.device_type }}</h3>
+
+                    <p class="repair-description">
+                        {{ repair.description|truncatechars:120 }}
+                    </p>
+
+                    <div class="repair-card-info">
+                        <span>Создана: {{ repair.created_at|date:"d.m.Y" }}</span>
+
+                        {% if repair.service %}
+                            <span>Услуга: {{ repair.service.name }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="repair-card-bottom">
+                        <span class="repair-price">{{ repair.work_cost }} ₽</span>
+
+                        <a href="{% url 'repair_detail' repair.id %}" class="repair-details-button">
+                            Подробнее →
+                        </a>
+                    </div>
+
+                </div>
+
+            {% empty %}
+                <div class="empty-repairs">
+                    <div class="empty-icon">▤</div>
+                    <h3>Пока здесь пусто</h3>
+                    <p>Заявок пока нет. Когда они появятся, вы увидите их здесь.</p>
+
+                    {% if user.role == 'client' %}
+                        <a href="{% url 'create_repair_request' %}" class="create-request-button">
+                            Создать первую заявку
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
